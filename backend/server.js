@@ -76,8 +76,13 @@ app.set("io", io);
 
 const PORT = process.env.PORT || 5000;
 
-httpServer.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// Only listen if not running on Vercel (Vercel handles this automatically)
+if (process.env.NODE_ENV !== 'production') {
+  httpServer.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+}
 
+// Export for Vercel
+export default app;
 export { io };
