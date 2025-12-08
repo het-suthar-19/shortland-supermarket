@@ -4,10 +4,13 @@ import { ShoppingCart, ArrowLeft, CheckCircle } from "lucide-react";
 import { productsAPI } from "../lib/api";
 import { useCartStore } from "../store/cartStore";
 
+import { useToast } from "../components/ToastContainer";
+
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCartStore();
+  const { showToast } = useToast();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -33,6 +36,7 @@ export default function ProductDetail() {
       addItem(product);
     }
     setAdded(true);
+    showToast(`Added ${quantity} ${product.name} to cart`, "success");
     setTimeout(() => setAdded(false), 2000);
   };
 

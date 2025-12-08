@@ -40,8 +40,8 @@ export default function AdminDashboard() {
 
     fetchStats();
 
-    // Poll for updates every 30 seconds (Vercel serverless doesn't support persistent sockets well)
-    const interval = setInterval(fetchStats, 30000);
+    // Poll for updates every 5 seconds for better real-time feel
+    const interval = setInterval(fetchStats, 5000);
 
     return () => clearInterval(interval);
   }, []);
