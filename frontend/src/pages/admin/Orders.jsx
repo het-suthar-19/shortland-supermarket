@@ -16,8 +16,8 @@ export default function AdminOrders() {
   useEffect(() => {
     fetchOrders();
 
-    // Poll for updates every 5 seconds
-    const interval = setInterval(fetchOrders, 5000);
+    // Poll for updates every 3 seconds
+    const interval = setInterval(fetchOrders, 3000);
 
     return () => clearInterval(interval);
   }, []);

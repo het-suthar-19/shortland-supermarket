@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useToast } from "../components/ToastContainer";
 import { useAuthStore } from "../store/authStore";
 import { ordersAPI } from "../lib/api";
 import { Package, CheckCircle, XCircle, Clock } from "lucide-react";
@@ -27,33 +28,54 @@ const statusConfig = {
 };
 
 export default function Orders() {
-  const { user } = useAuthStore();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
+  const previousOrdersRef = useRef([]);
 
   useEffect(() => {
     if (!user) return;
 
-    const fetchOrders = async () => {
+    const fetchOrders = async (silent = false) => {
       try {
+        if (!silent) setLoading(true);
         const res = await ordersAPI.getUserOrders(user.id);
-        setOrders(res.data);
+        const newOrders = res.data;
+
+        // Check for updates if we have previous data
+        if (previousOrdersRef.current.length > 0) {
+          newOrders.forEach((newOrder) => {
+            const oldOrder = previousOrdersRef.current.find(o => o.id === newOrder.id);
+            if (oldOrder && oldOrder.status !== newOrder.status) {
+              // Status changed! Show notification
+              if (newOrder.status === 'accepted') {
+                showToast(`Order #${newOrder.id.slice(0, 8)} has been accepted!`, "success");
+              } else if (newOrder.status === 'declined') {
+                showToast(`Order #${newOrder.id.slice(0, 8)} has been declined.`, "error");
+              } else if (newOrder.status === 'delivered') {
+                showToast(`Order #${newOrder.id.slice(0, 8)} has been delivered!`, "success");
+              }
+            }
+          });
+        }
+
+        setOrders(newOrders);
+        previousOrdersRef.current = newOrders;
       } catch (error) {
         console.error("Error fetching orders:", error);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
     };
 
+    // Initial fetch
     fetchOrders();
 
-    // Poll for updates every 5 seconds
-    const interval = setInterval(fetchOrders, 5000);
+    // Poll for updates every 3 seconds (Fast updates)
+    const interval = setInterval(() => fetchOrders(true), 3000);
 
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, showToast]);
 
-  if (loading) {
+  if (loading && orders.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
