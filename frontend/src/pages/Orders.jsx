@@ -1,9 +1,7 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "../store/authStore";
 import { ordersAPI } from "../lib/api";
 import { Package, CheckCircle, XCircle, Clock } from "lucide-react";
-import { io } from "socket.io-client";
-import { useToast } from "../components/ToastContainer";
 
 const statusConfig = {
   pending: {
@@ -32,8 +30,6 @@ export default function Orders() {
   const { user } = useAuthStore();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const socketRef = useRef(null);
-  const { showToast } = useToast();
 
   useEffect(() => {
     if (!user) return;
@@ -51,64 +47,11 @@ export default function Orders() {
 
     fetchOrders();
 
-    // Create single socket connection
-    const socket = io("http://localhost:5000");
-    socketRef.current = socket;
+    // Poll for updates every 15 seconds
+    const interval = setInterval(fetchOrders, 15000);
 
-    // Subscribe to user's personal room
-    socket.emit("subscribeUserRoom", user.id);
-
-    // Listen for order placed confirmation
-    socket.on("orderPlaced", (order) => {
-      setOrders((prev) => [order, ...prev]);
-      showToast(
-        `Order #${order.id.slice(0, 8)} placed successfully!`,
-        "success"
-      );
-    });
-
-    // Listen for order status updates
-    socket.on("orderStatusUpdated", ({ orderId, status, order }) => {
-      setOrders((prev) => prev.map((o) => (o.id === orderId ? order : o)));
-    });
-
-    // Listen for specific status events with notifications
-    socket.on("orderAccepted", (order) => {
-      setOrders((prev) => prev.map((o) => (o.id === order.id ? order : o)));
-      showToast(`Order #${order.id.slice(0, 8)} has been accepted!`, "success");
-    });
-
-    socket.on("orderDeclined", (order) => {
-      setOrders((prev) => prev.map((o) => (o.id === order.id ? order : o)));
-      showToast(`Order #${order.id.slice(0, 8)} has been declined.`, "error");
-    });
-
-    socket.on("orderDelivered", (order) => {
-      setOrders((prev) => prev.map((o) => (o.id === order.id ? order : o)));
-      showToast(
-        `Order #${order.id.slice(0, 8)} has been delivered!`,
-        "success"
-      );
-    });
-
-    // Subscribe to new orders when notified
-    socket.on("subscribeToOrder", (orderId) => {
-      socket.emit("subscribeOrderUpdates", orderId);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [user, showToast]);
-
-  // Subscribe to orders when they're loaded
-  useEffect(() => {
-    if (socketRef.current && orders.length > 0) {
-      orders.forEach((order) => {
-        socketRef.current.emit("subscribeOrderUpdates", order.id);
-      });
-    }
-  }, [orders]);
+    return () => clearInterval(interval);
+  }, [user]);
 
   if (loading) {
     return (

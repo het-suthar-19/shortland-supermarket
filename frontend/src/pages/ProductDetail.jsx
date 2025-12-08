@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ShoppingCart, ArrowLeft } from "lucide-react";
+import { ShoppingCart, ArrowLeft, CheckCircle } from "lucide-react";
 import { productsAPI } from "../lib/api";
 import { useCartStore } from "../store/cartStore";
 
@@ -11,6 +11,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -31,6 +32,8 @@ export default function ProductDetail() {
     for (let i = 0; i < quantity; i++) {
       addItem(product);
     }
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
   };
 
   if (loading) {
@@ -171,12 +174,17 @@ export default function ProductDetail() {
                 <button
                   onClick={handleAddToCart}
                   disabled={product.stock === 0}
-                  className="w-full bg-primary text-white py-4 rounded-lg hover:bg-primary-dark transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-lg font-semibold"
+                  className={`w-full py-4 rounded-lg transition flex items-center justify-center space-x-2 text-lg font-semibold ${added
+                    ? "bg-green-500 hover:bg-green-600 text-white"
+                    : "bg-primary text-white hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
+                    }`}
                 >
-                  <ShoppingCart className="w-6 h-6" />
+                  {added ? <CheckCircle className="w-6 h-6" /> : <ShoppingCart className="w-6 h-6" />}
                   <span>
                     {product.stock > 0
-                      ? `Add ${quantity} to Cart`
+                      ? added
+                        ? "Added to Cart!"
+                        : `Add ${quantity} to Cart`
                       : "Out of Stock"}
                   </span>
                 </button>

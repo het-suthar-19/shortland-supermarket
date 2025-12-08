@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { ordersAPI, productsAPI, categoriesAPI } from "../../lib/api";
 import { Package, ShoppingBag, Users, DollarSign } from "lucide-react";
-import { io } from "socket.io-client";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -41,15 +40,10 @@ export default function AdminDashboard() {
 
     fetchStats();
 
-    // Socket.io for real-time order updates
-    const socket = io("http://localhost:5000");
-    socket.on("newOrderForAdmin", () => {
-      fetchStats();
-    });
+    // Poll for updates every 30 seconds (Vercel serverless doesn't support persistent sockets well)
+    const interval = setInterval(fetchStats, 30000);
 
-    return () => {
-      socket.disconnect();
-    };
+    return () => clearInterval(interval);
   }, []);
 
   const statCards = [
@@ -135,6 +129,24 @@ export default function AdminDashboard() {
                 className="block bg-gray-200 text-black px-6 py-3 rounded-lg hover:bg-gray-300 transition text-center"
               >
                 Manage Orders
+              </a>
+              <a
+                href="/admin/employees"
+                className="block bg-gray-200 text-black px-6 py-3 rounded-lg hover:bg-gray-300 transition text-center"
+              >
+                Employees
+              </a>
+              <a
+                href="/admin/inventory"
+                className="block bg-gray-200 text-black px-6 py-3 rounded-lg hover:bg-gray-300 transition text-center"
+              >
+                Inventory
+              </a>
+              <a
+                href="/admin/salary"
+                className="block bg-gray-200 text-black px-6 py-3 rounded-lg hover:bg-gray-300 transition text-center"
+              >
+                Salary Planning
               </a>
             </div>
           </div>

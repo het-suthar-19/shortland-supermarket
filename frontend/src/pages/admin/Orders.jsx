@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { ordersAPI } from "../../lib/api";
 import { CheckCircle, XCircle, Package } from "lucide-react";
-import { io } from "socket.io-client";
 
 const statusConfig = {
   pending: { color: "bg-yellow-100 text-yellow-800", label: "Pending" },
@@ -17,15 +16,10 @@ export default function AdminOrders() {
   useEffect(() => {
     fetchOrders();
 
-    // Socket.io for real-time order updates
-    const socket = io("http://localhost:5000");
-    socket.on("newOrderForAdmin", (order) => {
-      setOrders((prev) => [order, ...prev]);
-    });
+    // Poll for updates every 15 seconds
+    const interval = setInterval(fetchOrders, 15000);
 
-    return () => {
-      socket.disconnect();
-    };
+    return () => clearInterval(interval);
   }, []);
 
   const fetchOrders = async () => {
