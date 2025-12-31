@@ -1,61 +1,44 @@
-# Shortland Backend API
+# Shortland Supermarket - Backend API
 
-Express.js backend API for Softland Supermarket application.
+**Robust, Scalable, and Secure.**
 
-## Setup
+The backbone of Shortland Supermarket, this API manages the business logic, data persistence, and real-time communications that power the application. It serves as the single source of truth for both the customer interface and the admin dashboard.
 
-1. Install dependencies:
+---
 
-```bash
-npm install
-```
+## 🔐 Core Capabilities
 
-2. Configure environment variables in `.env`:
+### **1. Secure Restful API**
+*   **Authentication & Authorization**: Implements industry-standard JWT (JSON Web Tokens) for stateless authentication. Custom middleware protects sensitive routes, ensuring only authorized admins can access management endpoints.
+*   **Data Validation**: rigorous input validation ensures data integrity before it ever reaches the database.
 
-```env
-DATABASE_URL="postgresql://postgres:admin@localhost:5432/softland?schema=public"
-JWT_SECRET="your-super-secret-jwt-key"
-JWT_EXPIRES_IN="7d"
-ADMIN_USER="admin@softland.com"
-ADMIN_PASS="root"
-PORT=5000
-NODE_ENV=development
-FRONTEND_URL="http://localhost:5173"
-```
+### **2. Real-Time Engine**
+*   **Socket.io Server**: Acts as the central hub for event broadcasting. It tracks active connections and instantly emits events (like `new_order` or `order_status_change`) to relevant clients, enabling the "live" feel of the platform.
 
-3. Generate Prisma Client:
+### **3. Media Processing**
+*   **Cloud Storage Integration**: Instead of storing heavy images locally or in the database, the backend acts as a secure signing authority to upload files to Cloudinary, returning optimized URLs for frontend delivery.
 
-```bash
-npm run prisma:generate
-```
+---
 
-4. Run migrations:
+## 🏗️ Architecture & Tools
 
-```bash
-npm run prisma:migrate
-```
+### **Database & ORM**
+*   **PostgreSQL**: A powerful, open-source object-relational database chosen for its reliability and support for complex relationships.
+*   **Prisma ORM**: Provides a type-safe database client. It defines the data model in a declarative schema file, automates database migrations, and simplifies complex joins and queries.
 
-5. Seed database:
+### **Server Framework**
+*   **Node.js & Express**: Built on the V8 engine for high-performance non-blocking I/O. Express provides the routing layer and middleware support (CORS, Parsing, Logging).
 
-```bash
-npm run prisma:seed
-```
+### **Data & Security Utilities**
+*   **BCrypt**: Uses salt+hash encryption for storing passwords, ensuring user credentials are safe even in the event of a data breach.
+*   **Multer**: Handling `multipart/form-data` for efficient file uploads before offloading to cloud storage.
+*   **Dotenv**: Environment variable management to keep secrets (API keys, DB URLs) secure and out of the codebase.
 
-6. Start server:
+---
 
-```bash
-npm run dev
-```
+## 📂 API Structure Overview
 
-## Scripts
-
-- `npm run dev` - Start development server with nodemon
-- `npm start` - Start production server
-- `npm run prisma:generate` - Generate Prisma Client
-- `npm run prisma:migrate` - Run database migrations
-- `npm run prisma:seed` - Seed database with sample data
-- `npm run prisma:studio` - Open Prisma Studio
-
-## API Documentation
-
-See main README.md for API endpoint documentation.
+*   **Auth Routes**: Registration, Login, Session validation.
+*   **Product Routes**: CRUD operations for inventory management.
+*   **Order Routes**: Order placement, status updates, and history retrieval.
+*   **Upload Routes**: Secure endpoints for handling media uploads.
